@@ -20,15 +20,13 @@ type repoMock struct {
 
 	CreateResult string
 	CreateError  error
-
-	UpdateError error
 }
 
 func (r *repoMock) Get(ctx context.Context, id string) (User, error) {
 	return r.GetResult, r.GetError
 }
 
-func (r *repoMock) GetBalance(ctx context.Context, id string) (float64, error) {
+func (r *repoMock) GetUserBalance(ctx context.Context, id string) (float64, error) {
 	return r.GetBalanceResult, r.GetBalanceError
 }
 
@@ -86,16 +84,16 @@ func TestServiceGetBalance(t *testing.T) {
 	}{
 		"Happy path": {
 			repo: &repoMock{
-				GetResult: User{Id: id, Balance: balance},
-				GetError:  nil,
+				GetBalanceResult: balance,
+				GetBalanceError:  nil,
 			},
 			result: balance,
 			err:    nil,
 		},
 		"Not found from repo": {
 			repo: &repoMock{
-				GetResult: User{},
-				GetError:  ErrUserNotFound,
+				GetBalanceResult: 0,
+				GetBalanceError:  ErrUserNotFound,
 			},
 			result: 0,
 			err:    ErrUserNotFound,
@@ -117,14 +115,10 @@ func TestServiceCreate(t *testing.T) {
 	id := uuid.New().String()
 	balance := 100.0
 	u := User{Id: id, Balance: balance}
-	ur := User{
-		Id:      id,
-		Balance: balance,
-	}
 
 	tests := map[string]struct {
 		repo   Repo
-		result User
+		result string
 		input  User
 		err    error
 	}{
@@ -132,41 +126,34 @@ func TestServiceCreate(t *testing.T) {
 			repo: &repoMock{
 				CreateResult: id,
 				CreateError:  nil,
-				GetResult:    ur,
-				GetError:     nil,
-			},
-			input:  u,
-			result: ur,
-			err:    nil,
-		},
-		"Not found from repo after create": {
-			repo: &repoMock{
-				CreateResult: id,
-				CreateError:  nil,
 				GetResult:    User{},
 				GetError:     ErrUserNotFound,
 			},
 			input:  u,
-			result: User{},
-			err:    ErrUserNotFound,
+			result: id,
+			err:    nil,
 		},
-		"Creation failure": {
+		"User with that index already exists": {
 			repo: &repoMock{
-				CreateResult: id,
-				CreateError:  ErrUserCreate,
+				GetResult:    User{Id: id, Balance: 200},
+				GetError:     nil,
+				CreateResult: "",
+				CreateError:  ErrUserAlreadyExists,
 			},
 			input:  u,
-			result: User{},
-			err:    ErrUserCreate,
+			result: "",
+			err:    ErrUserAlreadyExists,
 		},
 		"Creation with negative balance": {
 			repo: &repoMock{
 				CreateResult: id,
-				CreateError:  ErrUserCreateNegativeBalance,
+				CreateError:  ErrNegativeBalance,
+				GetResult:    User{},
+				GetError:     ErrUserNotFound,
 			},
 			input:  User{Id: id, Balance: -100},
-			result: User{},
-			err:    ErrUserCreateNegativeBalance,
+			result: "",
+			err:    ErrNegativeBalance,
 		},
 	}
 

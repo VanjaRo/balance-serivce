@@ -5,6 +5,7 @@ import "context"
 // Repo defines the DB level interaction of users
 type Repo interface {
 	Get(ctx context.Context, id string) (User, error)
+	GetUserBalance(ctx context.Context, id string) (float64, error)
 	GetAll(ctx context.Context, limit, offset int) ([]User, error)
 	Create(ctx context.Context, user User) (string, error)
 }
@@ -32,11 +33,7 @@ func (u *user) Get(ctx context.Context, id string) (User, error) {
 }
 
 func (u *user) GetBalance(ctx context.Context, id string) (float64, error) {
-	userDb, err := u.repo.Get(ctx, id)
-	if err != nil {
-		return 0, err
-	}
-	return userDb.Balance, nil
+	return u.repo.GetUserBalance(ctx, id)
 }
 
 func (u *user) GetAll(ctx context.Context, limit, offset int) ([]User, error) {
@@ -44,5 +41,14 @@ func (u *user) GetAll(ctx context.Context, limit, offset int) ([]User, error) {
 }
 
 func (u *user) Create(ctx context.Context, user User) (string, error) {
+	// check if user already exists
+	_, err := u.repo.Get(ctx, user.Id)
+	if err == nil {
+		return "", ErrUserAlreadyExists
+	}
+	// check negative balance
+	if user.Balance < 0 {
+		return "", ErrNegativeBalance
+	}
 	return u.repo.Create(ctx, user)
 }

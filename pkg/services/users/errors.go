@@ -9,5 +9,7 @@ var (
 
 	ErrUserCreate = errors.New("user could not be created")
 
-	ErrUserCreateNegativeBalance = errors.New("user could not be created with negative balance")
+	ErrNegativeBalance = errors.New("user could not be created with negative balance")
+
+	ErrUserAlreadyExists = errors.New("user with that index already exists")
 )
