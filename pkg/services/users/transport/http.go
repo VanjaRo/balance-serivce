@@ -7,6 +7,7 @@ import (
 	"github.com/VanjaRo/balance-serivce/pkg/services/users"
 	"github.com/VanjaRo/balance-serivce/pkg/services/users/store"
 	"github.com/VanjaRo/balance-serivce/pkg/utils/context"
+	"github.com/VanjaRo/balance-serivce/pkg/utils/log"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -32,11 +33,11 @@ func newHandler(router *gin.Engine, userService users.Service) {
 func (h *handler) GetUser(rCtx *gin.Context) {
 	ctx := context.GetReqCtx(rCtx)
 
-	// log.Info(ctx, "retrieving user id=%s", rCtx.Param("id"))
+	log.Info(ctx, "retrieving user id=%s", rCtx.Param("id"))
 	user, err := h.UserService.Get(ctx, rCtx.Param("id"))
 	if err != nil {
-		// status, appErr := handleError(err)
-		// rCtx.IndentedJSON(status, appErr)
+		status, appErr := handleError(err)
+		rCtx.IndentedJSON(status, appErr)
 		return
 	}
 
@@ -50,7 +51,6 @@ func (h *handler) GetAllUsers(rCtx *gin.Context) {
 	}
 	ctx := context.GetReqCtx(rCtx)
 
-	// users, err := h.UserHandler.GetAll(c)
 	if err := rCtx.BindQuery(&q); err != nil {
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
@@ -58,8 +58,8 @@ func (h *handler) GetAllUsers(rCtx *gin.Context) {
 
 	usrs, err := h.UserService.GetAll(ctx, q.Limit, q.Offset)
 	if err != nil {
-		// status, appErr := handleError(err)
-		// rCtx.IndentedJSON(status, appErr)
+		status, appErr := handleError(err)
+		rCtx.IndentedJSON(status, appErr)
 		return
 	}
 	rCtx.IndentedJSON(http.StatusOK, users.Users{Users: usrs})
@@ -70,10 +70,21 @@ func (h *handler) GetUserBalance(rCtx *gin.Context) {
 
 	balance, err := h.UserService.GetBalance(ctx, rCtx.Param("id"))
 	if err != nil {
-		// status, appErr := handleError(err)
-		// rCtx.IndentedJSON(status, appErr)
+		status, appErr := handleError(err)
+		rCtx.IndentedJSON(status, appErr)
 		return
 	}
 
 	rCtx.IndentedJSON(http.StatusOK, balance)
+}
+
+func handleError(e error) (int, error) {
+	switch e {
+	case users.ErrUserNotFound:
+		return http.StatusNotFound, errors.NewAppError(errors.NotFound, e.Error(), "id")
+	case users.ErrUserCreate:
+		return http.StatusInternalServerError, errors.NewAppError(errors.InternalServerError, "unable to create user", "")
+	default:
+		return http.StatusInternalServerError, errors.NewAppError(errors.InternalServerError, e.Error(), "unknown")
+	}
 }
