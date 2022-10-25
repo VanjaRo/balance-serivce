@@ -8,4 +8,6 @@ var (
 	ErrUserQuery = errors.New("requested users could not be retrieved base on the given criteria")
 
 	ErrUserCreate = errors.New("user could not be created")
+
+	ErrUserCreateNegativeBalance = errors.New("user could not be created with negative balance")
 )
