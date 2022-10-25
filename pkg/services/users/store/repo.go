@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"os/user"
 
 	"github.com/VanjaRo/balance-serivce/pkg/services/users"
 	"github.com/VanjaRo/balance-serivce/pkg/utils/log"
@@ -23,7 +24,7 @@ func (u *userRepo) Get(ctx context.Context, id string) (users.User, error) {
 	err := u.DB.Where("id = ?", id).First(&user).Error
 	if err != nil {
 		// TODO: loggin to context
-		log.Info(ctx, "user not found")
+		log.Info(ctx, "user with id=%s not found", id)
 		// TODO: add custom error return
 		return users.User{}, users.ErrUserNotFound
 	}
@@ -34,10 +35,11 @@ func (u *userRepo) Get(ctx context.Context, id string) (users.User, error) {
 
 // gets balance from user
 func (u *userRepo) GetUserBalance(ctx context.Context, id string) (float64, error) {
+
 	var userBalance float64
-	err := u.DB.Model(&users.User{}).Where("id = ?", id).Select("balance").Scan(&userBalance).Error
+	err := u.DB.Model(&users.User{}).Select("balance").Where("id = ?", id).First(&userBalance).Error
 	if err != nil {
-		log.Info(ctx, "user not found")
+		log.Info(ctx, "user with id=%s not found", id)
 		return 0, users.ErrUserNotFound
 	}
 	return userBalance, nil
@@ -61,4 +63,8 @@ func (u *userRepo) Create(ctx context.Context, user users.User) (string, error) 
 	}
 	log.Info(ctx, "user with id=%s created", user.Id)
 	return user.Id, nil
+}
+
+func (u *userRepo) Migrate() error {
+	return u.DB.AutoMigrate(&user.User{})
 }
