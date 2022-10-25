@@ -7,11 +7,18 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const (
+	servicesProfile = "SERVICES_PROFILE"
+	dockerProfile   = "docker"
+)
+
 func main() {
 	// init env variables
-	err := godotenv.Load(".env")
-	if err != nil {
-		panic("Error loading .env file")
+	profile := os.Getenv(servicesProfile)
+	if profile != dockerProfile {
+		if err := godotenv.Load(); err != nil {
+			panic("Error loading .env file")
+		}
 	}
 
 	api.Start(&api.Config{

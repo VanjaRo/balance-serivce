@@ -3,12 +3,13 @@ package db
 import (
 	"fmt"
 
+	"github.com/VanjaRo/balance-serivce/pkg/services/users"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-func InitDB(host string, port, user, password, dbName string, mdls ...interface{}) (*gorm.DB, error) {
+func InitDB(host, port, user, password, dbName string) (*gorm.DB, error) {
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbName)
 	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{
@@ -19,7 +20,7 @@ func InitDB(host string, port, user, password, dbName string, mdls ...interface{
 	}
 
 	// Migrate the schemas
-	db.AutoMigrate(mdls)
+	db.AutoMigrate(&users.User{})
 
 	return db, nil
 }

@@ -52,6 +52,7 @@ func (h *handler) GetAllUsers(rCtx *gin.Context) {
 	ctx := context.GetReqCtx(rCtx)
 
 	if err := rCtx.BindQuery(&q); err != nil {
+		log.Info(ctx, "query parse error: %s", err.Error())
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
