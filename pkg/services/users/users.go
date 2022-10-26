@@ -50,5 +50,7 @@ func (u *user) Create(ctx context.Context, user User) (string, error) {
 	if user.Balance < 0 {
 		return "", ErrNegativeBalance
 	}
+	// set user version to 1
+	user.Version = 1
 	return u.repo.Create(ctx, user)
 }

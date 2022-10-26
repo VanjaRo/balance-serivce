@@ -47,10 +47,10 @@ func TestServiceGet(t *testing.T) {
 	}{
 		"Happy path": {
 			repo: &repoMock{
-				GetResult: User{Id: id},
+				GetResult: User{Id: id, Balance: 100, Version: 1},
 				GetError:  nil,
 			},
-			result: User{Id: id},
+			result: User{Id: id, Balance: 100, Version: 1},
 			err:    nil,
 		},
 		"Not found from repo": {
