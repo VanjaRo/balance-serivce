@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/VanjaRo/balance-serivce/pkg/db"
+	transactionsTransport "github.com/VanjaRo/balance-serivce/pkg/services/transactions/transport"
 	usersTransport "github.com/VanjaRo/balance-serivce/pkg/services/users/transport"
 	"github.com/VanjaRo/balance-serivce/pkg/utils/log"
 	"github.com/gin-gonic/gin"
@@ -37,6 +38,7 @@ func Start(cfg *Config) {
 	router := gin.New()
 
 	usersTransport.ActivateHandlers(router, conn)
+	transactionsTransport.ActivateHandlers(router, conn)
 
 	if err := router.Run(cfg.AppHost + ":" + cfg.AppPort); err != nil {
 		log.Error(ctx, "unable to start the server: %s", err.Error())
