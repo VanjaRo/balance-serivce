@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 
+	"github.com/VanjaRo/balance-serivce/pkg/services/transactions"
 	"github.com/VanjaRo/balance-serivce/pkg/services/users"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -20,7 +21,7 @@ func InitDB(host, port, user, password, dbName string) (*gorm.DB, error) {
 	}
 
 	// Migrate the schemas
-	db.AutoMigrate(&users.User{})
+	db.AutoMigrate(&users.User{}, &transactions.Transaction{})
 
 	return db, nil
 }
