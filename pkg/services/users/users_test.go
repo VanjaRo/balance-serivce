@@ -20,6 +20,8 @@ type repoMock struct {
 
 	CreateResult string
 	CreateError  error
+
+	UpdateErr error
 }
 
 func (r *repoMock) Get(ctx context.Context, id string) (User, error) {
@@ -36,6 +38,10 @@ func (r *repoMock) GetAll(ctx context.Context, limit, offset int) ([]User, error
 
 func (r *repoMock) Create(ctx context.Context, u User) (string, error) {
 	return r.CreateResult, r.CreateError
+}
+
+func (r *repoMock) UpdateUserBalance(ctx context.Context, userId string, balanceDiff float64) error {
+	return r.UpdateErr
 }
 
 func TestServiceGet(t *testing.T) {
@@ -160,7 +166,7 @@ func TestServiceCreate(t *testing.T) {
 	for testName, test := range tests {
 		t.Run(testName, func(t *testing.T) {
 			service := NewUserService(test.repo)
-			response, err := service.Create(context.Background(), test.input)
+			response, err := service.Create(context.Background(), test.input.Id, test.input.Balance)
 
 			assert.Equal(t, test.err, err)
 			assert.Equal(t, test.result, response)

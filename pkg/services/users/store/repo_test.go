@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/VanjaRo/balance-serivce/pkg/services/transactions"
 	"github.com/VanjaRo/balance-serivce/pkg/services/users"
 	"github.com/VanjaRo/balance-serivce/pkg/utils/dbmock"
 	"github.com/stretchr/testify/assert"
@@ -15,7 +16,7 @@ import (
 func TestUserRepo(t *testing.T) {
 	db, fnCleanup := dbmock.InitMockDB()
 	defer fnCleanup()
-	db.AutoMigrate(&users.User{})
+	db.AutoMigrate(&users.User{}, &transactions.Transaction{})
 	// create user
 	t.Run("create user", func(t *testing.T) {
 		repo := NewUserRepo(db)
@@ -61,5 +62,33 @@ func TestUserRepo(t *testing.T) {
 		_, err := repo.GetUserBalance(context.Background(), "3")
 		assert.Error(t, err)
 		assert.Equal(t, users.ErrUserNotFound, err)
+	})
+	// update user balance
+	t.Run("update user balance", func(t *testing.T) {
+		repo := NewUserRepo(db)
+		err := repo.UpdateUserBalance(context.Background(), "1", 200.0)
+		assert.NoError(t, err)
+	})
+	// update user balance not found
+	t.Run("update user balance not found", func(t *testing.T) {
+		repo := NewUserRepo(db)
+		err := repo.UpdateUserBalance(context.Background(), "3", 200.0)
+		assert.Error(t, err)
+		assert.Equal(t, users.ErrUserNotFound, err)
+	})
+	// update user balance with negative final balance
+	t.Run("update user balance with negative final balance", func(t *testing.T) {
+		repo := NewUserRepo(db)
+		err := repo.UpdateUserBalance(context.Background(), "1", -400.0)
+		assert.Error(t, err)
+		assert.Equal(t, users.ErrNegativeBalance, err)
+	})
+	// update user balance changed version
+	t.Run("update user balance changed version", func(t *testing.T) {
+		repo := NewUserRepo(db)
+		_ = repo.UpdateUserBalance(context.Background(), "1", 200.0)
+		user, err := repo.Get(context.Background(), "1")
+		assert.NoError(t, err)
+		assert.Equal(t, 2, user.Version)
 	})
 }

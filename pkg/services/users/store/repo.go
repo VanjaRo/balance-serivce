@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"fmt"
 	"os/user"
 
 	"github.com/VanjaRo/balance-serivce/pkg/services/users"
@@ -63,6 +64,36 @@ func (u *userRepo) Create(ctx context.Context, user users.User) (string, error) 
 	}
 	log.Info(ctx, "user with id=%s created", user.Id)
 	return user.Id, nil
+}
+
+func (u *userRepo) UpdateUserBalance(ctx context.Context, userId string, balanceDiff float64) error {
+	//  update balance using optimistic locking
+	for i := 0; i < 100; i++ {
+		// get user
+		user, err := u.Get(ctx, userId)
+		if err != nil {
+			return err
+		}
+		// check if balance is negative
+		if user.Balance+balanceDiff < 0.0 {
+			return users.ErrNegativeBalance
+		}
+		fmt.Printf("user balance: %f, user version: %d", user.Balance, user.Version)
+		// update balance
+		user.Balance += balanceDiff
+		user.Version++
+		result := u.DB.Model(&users.User{}).Where("id = ? AND version = ?", userId, user.Version-1).Updates(&user)
+		if result.Error != nil {
+			log.Error(ctx, "error while updating balance")
+			return result.Error
+		}
+		// check if user was updated
+		if result.RowsAffected == 0 {
+			continue
+		}
+		return nil
+	}
+	return nil
 }
 
 func (u *userRepo) Migrate() error {
