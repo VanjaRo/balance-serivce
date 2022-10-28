@@ -6,6 +6,7 @@ type MockTransactionsService struct {
 	DepositErr error
 	FreezeErr  error
 	ApplyErr   error
+	RevertErr  error
 }
 
 func (s *MockTransactionsService) Deposit(ctx context.Context, userId string, amount float64) error {
@@ -15,5 +16,9 @@ func (s *MockTransactionsService) Freeze(ctx context.Context, userId, orderId, s
 	return s.FreezeErr
 }
 func (s *MockTransactionsService) Apply(ctx context.Context, userId, orderId, service_id string, amount float64) error {
+	return s.ApplyErr
+}
+
+func (s *MockTransactionsService) Revert(ctx context.Context, userId, orderId, service_id string, amount float64) error {
 	return s.ApplyErr
 }

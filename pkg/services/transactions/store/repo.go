@@ -48,6 +48,21 @@ func (tr *transactionRepo) UpdateTrStatus(ctx context.Context, t transactions.Tr
 	return nil
 }
 
+func (tr *transactionRepo) DeleteTr(ctx context.Context, t transactions.Transaction) error {
+
+	result := tr.DB.Model(&transactions.Transaction{}).Delete(&t)
+	if result.Error != nil {
+		log.Error(ctx, "error while deleting transaction status")
+		return result.Error
+	}
+	// check if transaction was updated
+	if result.RowsAffected == 0 {
+		log.Error(ctx, "transaction was not deleted")
+		return transactions.ErrTransactionNotFound
+	}
+	return nil
+}
+
 func (tr *transactionRepo) Migrate() error {
 	return tr.DB.AutoMigrate(&transactions.Transaction{})
 }
