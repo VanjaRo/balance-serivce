@@ -36,6 +36,7 @@ func newTransactionHandler(router *gin.Engine, userService users.Service, transa
 	router.POST("/transactions/freeze", handler.Freeze)
 	router.POST("/transactions/apply", handler.Apply)
 	router.DELETE("/transactions/revert", handler.Revert)
+	router.GET("/transactions/stat/:id", handler.Apply)
 }
 
 func (h *handler) Deposit(rCtx *gin.Context) {
@@ -46,7 +47,7 @@ func (h *handler) Deposit(rCtx *gin.Context) {
 	ctx := context.GetReqCtx(rCtx)
 
 	if err := rCtx.BindJSON(&q); err != nil {
-		log.Info(ctx, "query parse error: %s", err.Error())
+		log.Info(ctx, "json parse error: %s", err.Error())
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
@@ -90,14 +91,16 @@ func (h *handler) Freeze(rCtx *gin.Context) {
 	}
 	ctx := context.GetReqCtx(rCtx)
 
+	userId := rCtx.Param("id")
+
 	if err := rCtx.BindJSON(&q); err != nil {
-		log.Info(ctx, "query parse error: %s", err.Error())
+		log.Info(ctx, "json parse error: %s", err.Error())
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
 	fmt.Printf("q: %+v", q)
 	// check if user exists
-	_, err := h.UserService.Get(ctx, q.UserId)
+	_, err := h.UserService.Get(ctx, userId)
 	if err != nil {
 		// if user does not exist return error
 		status, appErr := handleError(err)
@@ -111,7 +114,7 @@ func (h *handler) Freeze(rCtx *gin.Context) {
 			rCtx.IndentedJSON(status, appErr)
 			return
 		}
-		// if user exists, update balance
+		// update balance
 		err := h.UserService.UpdateUserBalance(ctx, q.UserId, -q.Amount)
 		if err != nil {
 			status, appErr := handleError(err)
@@ -133,7 +136,7 @@ func (h *handler) Apply(rCtx *gin.Context) {
 	ctx := context.GetReqCtx(rCtx)
 
 	if err := rCtx.BindJSON(&q); err != nil {
-		log.Info(ctx, "query parse error: %s", err.Error())
+		log.Info(ctx, "json parse error: %s", err.Error())
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
@@ -168,7 +171,7 @@ func (h *handler) Revert(rCtx *gin.Context) {
 	ctx := context.GetReqCtx(rCtx)
 
 	if err := rCtx.BindJSON(&q); err != nil {
-		log.Info(ctx, "query parse error: %s", err.Error())
+		log.Info(ctx, "json parse error: %s", err.Error())
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
@@ -183,6 +186,13 @@ func (h *handler) Revert(rCtx *gin.Context) {
 	} else {
 		// revert transaction
 		err = h.TransactionService.Revert(ctx, q.UserId, q.OrderId, q.ServiceId, q.Amount)
+		if err != nil {
+			status, appErr := handleError(err)
+			rCtx.IndentedJSON(status, appErr)
+			return
+		}
+		// update balance, returning frozen money
+		err := h.UserService.UpdateUserBalance(ctx, q.UserId, q.Amount)
 		if err != nil {
 			status, appErr := handleError(err)
 			rCtx.IndentedJSON(status, appErr)
