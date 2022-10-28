@@ -25,8 +25,27 @@ func TestUserRepo(t *testing.T) {
 			UserId:    "1",
 			ServiceId: "1",
 			Amount:    100,
+			State:     transactions.TRANSACTION_STATE_FROZEN,
+			IsDeposit: false,
 		}
 		err := repo.Create(context.Background(), transaction)
+		assert.NoError(t, err)
+	})
+	// get transaction
+	t.Run("get transaction", func(t *testing.T) {
+		repo := NewTransactionRepo(db)
+		transaction, err := repo.GetTrByOrderAndServiceIds(context.Background(), "1", "1")
+		assert.NoError(t, err)
+		assert.NotEmpty(t, transaction)
+	})
+	// update transaction
+	t.Run("update transaction", func(t *testing.T) {
+		repo := NewTransactionRepo(db)
+		transaction, err := repo.GetTrByOrderAndServiceIds(context.Background(), "1", "1")
+		assert.NoError(t, err)
+		assert.NotEmpty(t, transaction)
+		transaction.State = transactions.TRANSACTION_STATE_APPLIED
+		err = repo.UpdateTrStatus(context.Background(), transaction)
 		assert.NoError(t, err)
 	})
 }
