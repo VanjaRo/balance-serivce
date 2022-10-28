@@ -14,6 +14,6 @@ func (s *MockTransactionsService) Deposit(ctx context.Context, userId string, am
 func (s *MockTransactionsService) Freeze(ctx context.Context, userId, orderId, serviceId string, amount float64) error {
 	return s.FreezeErr
 }
-func (s *MockTransactionsService) Apply(ctx context.Context, serviceId, orderId string) error {
+func (s *MockTransactionsService) Apply(ctx context.Context, userId, orderId, service_id string, amount float64) error {
 	return s.ApplyErr
 }
