@@ -14,6 +14,8 @@ type repoMock struct {
 
 	GetResult Transaction
 	GetError  error
+
+	UpdateErr error
 }
 
 func (r *repoMock) Create(ctx context.Context, transaction Transaction) error {
@@ -22,6 +24,10 @@ func (r *repoMock) Create(ctx context.Context, transaction Transaction) error {
 
 func (r *repoMock) GetTrByOrderAndServiceIds(ctx context.Context, orderId, serviceId string) (Transaction, error) {
 	return r.GetResult, r.GetError
+}
+
+func (r *repoMock) UpdateTrStatus(ctx context.Context, t Transaction) error {
+	return r.UpdateErr
 }
 
 func TestServiceDeposit(t *testing.T) {
