@@ -18,4 +18,6 @@ var (
 	ErrTransactionAlreadyApplied = errors.New("transaction already applied")
 
 	ErrCantRevertNotFrozenTransaction = errors.New("can't revert not frozen transaction")
+
+	ErrTransactionQuery = errors.New("requested transactions could not be retrieved base on the given criteria")
 )

@@ -18,6 +18,9 @@ type repoMock struct {
 	UpdateErr error
 
 	DeleteErr error
+
+	GetApplTrsResult []Transaction
+	GetApplTrsError  error
 }
 
 func (r *repoMock) Create(ctx context.Context, transaction Transaction) error {
@@ -34,6 +37,10 @@ func (r *repoMock) UpdateTrStatus(ctx context.Context, t Transaction) error {
 
 func (r *repoMock) DeleteTr(ctx context.Context, t Transaction) error {
 	return r.DeleteErr
+}
+
+func (r *repoMock) GetTrsByUserId(ctx context.Context, userId string, limit, offset int, sortConf *SortConfig) ([]Transaction, error) {
+	return r.GetApplTrsResult, r.GetApplTrsError
 }
 
 func TestServiceDeposit(t *testing.T) {
