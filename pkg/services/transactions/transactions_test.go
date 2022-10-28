@@ -11,10 +11,17 @@ import (
 
 type repoMock struct {
 	CreateError error
+
+	GetResult Transaction
+	GetError  error
 }
 
 func (r *repoMock) Create(ctx context.Context, transaction Transaction) error {
 	return r.CreateError
+}
+
+func (r *repoMock) GetTrByOrderAndServiceIds(ctx context.Context, orderId, serviceId string) (Transaction, error) {
+	return r.GetResult, r.GetError
 }
 
 func TestServiceDeposit(t *testing.T) {
