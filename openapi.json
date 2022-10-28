@@ -1,0 +1,336 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "AvitoGo",
+    "contact": {},
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://0.0.0.0:8080",
+      "variables": {}
+    }
+  ],
+  "paths": {
+    "/users": {
+      "get": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "Get all Users",
+        "operationId": "GetallUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "Get User Balance",
+        "operationId": "GetUserBalance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/transactions/deposit": {
+      "post": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "Deposit",
+        "operationId": "Deposit",
+        "parameters": [],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/DepositRequest"
+                  },
+                  {
+                    "example": {
+                      "user_id": "1",
+                      "amount": 1020.0
+                    }
+                  }
+                ]
+              },
+              "example": {
+                "user_id": "1",
+                "amount": 1020.0
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/transactions/freeze": {
+      "post": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "Freeze",
+        "operationId": "Freeze",
+        "parameters": [],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FreezeRequest"
+                  },
+                  {
+                    "example": {
+                      "user_id": "1",
+                      "service_id": "1",
+                      "order_id": "3",
+                      "amount": 1000.0
+                    }
+                  }
+                ]
+              },
+              "example": {
+                "user_id": "1",
+                "service_id": "1",
+                "order_id": "3",
+                "amount": 1000.0
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/transactions/revert": {
+      "delete": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "Revert",
+        "operationId": "Revert",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "enum": [
+                "application/json"
+              ],
+              "type": "string",
+              "example": "application/json"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      }
+    },
+    "/transactions/apply": {
+      "post": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "Apply",
+        "operationId": "Apply",
+        "parameters": [],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ApplyRequest"
+                  },
+                  {
+                    "example": {
+                      "user_id": "1",
+                      "service_id": "1",
+                      "order_id": "3",
+                      "amount": 1000.0
+                    }
+                  }
+                ]
+              },
+              "example": {
+                "user_id": "1",
+                "service_id": "1",
+                "order_id": "3",
+                "amount": 1000.0
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DepositRequest": {
+        "title": "DepositRequest",
+        "required": [
+          "user_id",
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        },
+        "example": {
+          "user_id": "1",
+          "amount": 1020.0
+        }
+      },
+      "FreezeRequest": {
+        "title": "FreezeRequest",
+        "required": [
+          "user_id",
+          "service_id",
+          "order_id",
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "service_id": {
+            "type": "string"
+          },
+          "order_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        },
+        "example": {
+          "user_id": "1",
+          "service_id": "1",
+          "order_id": "3",
+          "amount": 1000.0
+        }
+      },
+      "RevertRequest": {
+        "title": "RevertRequest",
+        "required": [
+          "user_id",
+          "service_id",
+          "order_id",
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "service_id": {
+            "type": "string"
+          },
+          "order_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        },
+        "example": {
+          "user_id": "1",
+          "service_id": "1",
+          "order_id": "1",
+          "amount": 1000.0
+        }
+      },
+      "ApplyRequest": {
+        "title": "ApplyRequest",
+        "required": [
+          "user_id",
+          "service_id",
+          "order_id",
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "service_id": {
+            "type": "string"
+          },
+          "order_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        },
+        "example": {
+          "user_id": "1",
+          "service_id": "1",
+          "order_id": "3",
+          "amount": 1000.0
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Misc",
+      "description": ""
+    }
+  ]
+}

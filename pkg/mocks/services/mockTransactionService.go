@@ -1,11 +1,24 @@
 package servmocs
 
-import "context"
+import (
+	"context"
+
+	"github.com/VanjaRo/balance-serivce/pkg/services/transactions"
+)
 
 type MockTransactionsService struct {
 	DepositErr error
-	FreezeErr  error
-	ApplyErr   error
+
+	FreezeErr error
+
+	ApplyErr error
+
+	RevertErr error
+
+	GetUserTrsResult []transactions.Transaction
+	GetUserTrsError  error
+
+	ExportCSVError error
 }
 
 func (s *MockTransactionsService) Deposit(ctx context.Context, userId string, amount float64) error {
@@ -16,4 +29,15 @@ func (s *MockTransactionsService) Freeze(ctx context.Context, userId, orderId, s
 }
 func (s *MockTransactionsService) Apply(ctx context.Context, userId, orderId, service_id string, amount float64) error {
 	return s.ApplyErr
+}
+
+func (s *MockTransactionsService) Revert(ctx context.Context, userId, orderId, service_id string, amount float64) error {
+	return s.ApplyErr
+}
+func (s *MockTransactionsService) GetUserTrs(ctx context.Context, userId string, limit, offset int, sortConf *transactions.SortConfig) ([]transactions.Transaction, error) {
+	return s.GetUserTrsResult, s.GetUserTrsError
+}
+
+func (s *MockTransactionsService) ExportTrsWithinYearMonth(ctx context.Context, year, month int) error {
+	return s.ExportCSVError
 }

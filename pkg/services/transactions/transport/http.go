@@ -35,6 +35,11 @@ func newTransactionHandler(router *gin.Engine, userService users.Service, transa
 	router.POST("/transactions/deposit", handler.Deposit)
 	router.POST("/transactions/freeze", handler.Freeze)
 	router.POST("/transactions/apply", handler.Apply)
+	router.DELETE("/transactions/revert", handler.Revert)
+	router.GET("/transactions/stat/:id", handler.GetUserTrs)
+	router.GET("/transactions/services-sum-amount", handler.ExportTrsWithinYearMonth)
+
+	router.Static("/csvs", "./csvs")
 }
 
 func (h *handler) Deposit(rCtx *gin.Context) {
@@ -45,7 +50,7 @@ func (h *handler) Deposit(rCtx *gin.Context) {
 	ctx := context.GetReqCtx(rCtx)
 
 	if err := rCtx.BindJSON(&q); err != nil {
-		log.Info(ctx, "query parse error: %s", err.Error())
+		log.Info(ctx, "json parse error: %s", err.Error())
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
@@ -89,14 +94,16 @@ func (h *handler) Freeze(rCtx *gin.Context) {
 	}
 	ctx := context.GetReqCtx(rCtx)
 
+	userId := rCtx.Param("id")
+
 	if err := rCtx.BindJSON(&q); err != nil {
-		log.Info(ctx, "query parse error: %s", err.Error())
+		log.Info(ctx, "json parse error: %s", err.Error())
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
 	fmt.Printf("q: %+v", q)
 	// check if user exists
-	_, err := h.UserService.Get(ctx, q.UserId)
+	_, err := h.UserService.Get(ctx, userId)
 	if err != nil {
 		// if user does not exist return error
 		status, appErr := handleError(err)
@@ -110,7 +117,7 @@ func (h *handler) Freeze(rCtx *gin.Context) {
 			rCtx.IndentedJSON(status, appErr)
 			return
 		}
-		// if user exists, update balance
+		// update balance
 		err := h.UserService.UpdateUserBalance(ctx, q.UserId, -q.Amount)
 		if err != nil {
 			status, appErr := handleError(err)
@@ -132,7 +139,7 @@ func (h *handler) Apply(rCtx *gin.Context) {
 	ctx := context.GetReqCtx(rCtx)
 
 	if err := rCtx.BindJSON(&q); err != nil {
-		log.Info(ctx, "query parse error: %s", err.Error())
+		log.Info(ctx, "json parse error: %s", err.Error())
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
@@ -155,6 +162,142 @@ func (h *handler) Apply(rCtx *gin.Context) {
 	}
 
 	rCtx.IndentedJSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func (h *handler) Revert(rCtx *gin.Context) {
+	var q struct {
+		UserId    string  `json:"user_id" binding:"required"`
+		OrderId   string  `json:"order_id" binding:"required"`
+		ServiceId string  `json:"service_id" binding:"required"`
+		Amount    float64 `json:"amount" binding:"required"`
+	}
+	ctx := context.GetReqCtx(rCtx)
+
+	if err := rCtx.BindJSON(&q); err != nil {
+		log.Info(ctx, "json parse error: %s", err.Error())
+		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
+		return
+	}
+	fmt.Printf("q: %+v", q)
+	// check if user exists
+	_, err := h.UserService.Get(ctx, q.UserId)
+	if err != nil {
+		// if user does not exist return error
+		status, appErr := handleError(err)
+		rCtx.IndentedJSON(status, appErr)
+		return
+	} else {
+		// revert transaction
+		err = h.TransactionService.Revert(ctx, q.UserId, q.OrderId, q.ServiceId, q.Amount)
+		if err != nil {
+			status, appErr := handleError(err)
+			rCtx.IndentedJSON(status, appErr)
+			return
+		}
+		// update balance, returning frozen money
+		err := h.UserService.UpdateUserBalance(ctx, q.UserId, q.Amount)
+		if err != nil {
+			status, appErr := handleError(err)
+			rCtx.IndentedJSON(status, appErr)
+			return
+		}
+	}
+
+	rCtx.IndentedJSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func (h *handler) GetUserTrs(rCtx *gin.Context) {
+	var q struct {
+		Limit            int  `form:"limit,default=25"`
+		Offset           int  `form:"offset,default=0"`
+		SortByDateAsc    bool `form:"sort_by_date_asc,default=false"`
+		SortByDateDesc   bool `form:"sort_by_date_desc,default=false"`
+		SortByAmountAsc  bool `form:"sort_by_amount_asc,default=false"`
+		SortByAmountDesc bool `form:"sort_by_amount_desc,default=false"`
+	}
+	// if both asc and desc are set, desc will be used
+	// if both amount and date are set, amount will be used first
+	ctx := context.GetReqCtx(rCtx)
+
+	userId := rCtx.Param("id")
+
+	if err := rCtx.BindQuery(&q); err != nil {
+		log.Info(ctx, "query parse error: %s", err.Error())
+		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
+		return
+	}
+	fmt.Printf("q: %+v", q)
+	// check if user exists
+	_, err := h.UserService.Get(ctx, userId)
+	if err != nil {
+		// if user does not exist return error
+		status, appErr := handleError(err)
+		rCtx.IndentedJSON(status, appErr)
+		return
+	} else {
+		sortConf := &transactions.SortConfig{
+			ByDateAsc:    q.SortByDateAsc,
+			ByDateDesc:   q.SortByDateDesc,
+			ByAmountAsc:  q.SortByAmountAsc,
+			ByAmountDesc: q.SortByAmountDesc,
+		}
+		// get user stat
+		stat, err := h.TransactionService.GetUserTrs(ctx, userId, q.Limit, q.Offset, sortConf)
+		if err != nil {
+			status, appErr := handleError(err)
+			rCtx.IndentedJSON(status, appErr)
+			return
+		}
+		// format user stat
+		var res []map[string]interface{}
+
+		for _, s := range stat {
+			// deposit format
+			if s.IsDeposit {
+				res = append(res, map[string]interface{}{
+					"date":   s.UpdatedAt,
+					"amount": s.Amount,
+					"type":   "deposit",
+				})
+			} else {
+				// withdraw format
+				res = append(res, map[string]interface{}{
+					"date":       s.UpdatedAt,
+					"amount":     s.Amount,
+					"order_id":   s.OrderId,
+					"service_id": s.ServiceId,
+					"type":       "withdrawal",
+					"state":      s.State,
+				})
+			}
+		}
+		rCtx.IndentedJSON(http.StatusOK, res)
+	}
+}
+
+func (h *handler) ExportTrsWithinYearMonth(rCtx *gin.Context) {
+	var q struct {
+		Year  int `form:"year" binding:"required"`
+		Month int `form:"month" binding:"required"`
+	}
+	ctx := context.GetReqCtx(rCtx)
+
+	if err := rCtx.BindQuery(&q); err != nil {
+		log.Info(ctx, "query parse error: %s", err.Error())
+		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
+		return
+	}
+
+	err := h.TransactionService.ExportTrsWithinYearMonth(ctx, q.Year, q.Month)
+	if err != nil {
+		status, appErr := handleError(err)
+		rCtx.IndentedJSON(status, appErr)
+		return
+	}
+
+	uri := fmt.Sprintf("%s/csvs/services-stats-%d-%d.csv", rCtx.Request.Host, q.Year, q.Month)
+
+	rCtx.IndentedJSON(http.StatusOK, gin.H{"uri": uri})
 }
 
 func handleError(e error) (int, error) {

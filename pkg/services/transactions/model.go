@@ -19,7 +19,7 @@ type Transaction struct {
 	Amount    float64   `json:"amount"`
 	State     string    `json:"state"`
 	IsDeposit bool      `json:"type"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime:milli" json:"update_time"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime:milli" json:"updated_at"`
 }
 
 // For the deposit transaction, the service_id and order_id fields will be empty
@@ -28,4 +28,18 @@ type Transaction struct {
 // making it a separate entity would increse the complexity of the DB structure
 type Transactions struct {
 	Transactions []Transaction `json:"transactions"`
+}
+
+// Sorting struct is used to sort the transactions
+type SortConfig struct {
+	ByDateAsc  bool
+	ByDateDesc bool
+
+	ByAmountAsc  bool
+	ByAmountDesc bool
+}
+
+type ServicesStat struct {
+	ServiceId string  `json:"service_id"`
+	Sum       float64 `json:"sum"`
 }
