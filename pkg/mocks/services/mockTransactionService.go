@@ -15,8 +15,8 @@ type MockTransactionsService struct {
 
 	RevertErr error
 
-	GetUserStatResult []transactions.Transaction
-	GetUserStatError  error
+	GetUserTrsResult []transactions.Transaction
+	GetUserTrsError  error
 }
 
 func (s *MockTransactionsService) Deposit(ctx context.Context, userId string, amount float64) error {
@@ -32,6 +32,6 @@ func (s *MockTransactionsService) Apply(ctx context.Context, userId, orderId, se
 func (s *MockTransactionsService) Revert(ctx context.Context, userId, orderId, service_id string, amount float64) error {
 	return s.ApplyErr
 }
-func (s *MockTransactionsService) GetUserStat(ctx context.Context, userId string, limit, offset int, sortConf *transactions.SortConfig) ([]transactions.Transaction, error) {
-	return s.GetUserStatResult, s.GetUserStatError
+func (s *MockTransactionsService) GetUserTrs(ctx context.Context, userId string, limit, offset int, sortConf *transactions.SortConfig) ([]transactions.Transaction, error) {
+	return s.GetUserTrsResult, s.GetUserTrsError
 }

@@ -36,7 +36,7 @@ func newTransactionHandler(router *gin.Engine, userService users.Service, transa
 	router.POST("/transactions/freeze", handler.Freeze)
 	router.POST("/transactions/apply", handler.Apply)
 	router.DELETE("/transactions/revert", handler.Revert)
-	router.GET("/transactions/stat/:id", handler.GetUserStat)
+	router.GET("/transactions/stat/:id", handler.GetUserTrs)
 }
 
 func (h *handler) Deposit(rCtx *gin.Context) {
@@ -203,7 +203,7 @@ func (h *handler) Revert(rCtx *gin.Context) {
 	rCtx.IndentedJSON(http.StatusOK, gin.H{"status": "ok"})
 }
 
-func (h *handler) GetUserStat(rCtx *gin.Context) {
+func (h *handler) GetUserTrs(rCtx *gin.Context) {
 	var q struct {
 		Limit            int  `form:"limit,default=25"`
 		Offset           int  `form:"offset,default=0"`
@@ -239,7 +239,7 @@ func (h *handler) GetUserStat(rCtx *gin.Context) {
 			ByAmountDesc: q.SortByAmountDesc,
 		}
 		// get user stat
-		stat, err := h.TransactionService.GetUserStat(ctx, userId, q.Limit, q.Offset, sortConf)
+		stat, err := h.TransactionService.GetUserTrs(ctx, userId, q.Limit, q.Offset, sortConf)
 		if err != nil {
 			status, appErr := handleError(err)
 			rCtx.IndentedJSON(status, appErr)

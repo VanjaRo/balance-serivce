@@ -17,7 +17,7 @@ type Service interface {
 	Freeze(ctx context.Context, userId, orderId, service_id string, amount float64) error
 	Apply(ctx context.Context, userId, orderId, service_id string, amount float64) error
 	Revert(ctx context.Context, userId, orderId, service_id string, amount float64) error
-	GetUserStat(ctx context.Context, userId string, limit, offset int, sortConf *SortConfig) ([]Transaction, error)
+	GetUserTrs(ctx context.Context, userId string, limit, offset int, sortConf *SortConfig) ([]Transaction, error)
 }
 
 type transaction struct {
@@ -136,7 +136,7 @@ func (t *transaction) Revert(ctx context.Context, userId, orderId, serviceId str
 
 }
 
-func (t *transaction) GetUserStat(ctx context.Context, userId string, limit, offset int, sortConf *SortConfig) ([]Transaction, error) {
+func (t *transaction) GetUserTrs(ctx context.Context, userId string, limit, offset int, sortConf *SortConfig) ([]Transaction, error) {
 	return t.repo.GetTrsByUserId(ctx, userId, limit, offset, sortConf)
 }
 
