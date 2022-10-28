@@ -63,6 +63,32 @@ func (tr *transactionRepo) DeleteTr(ctx context.Context, t transactions.Transact
 	return nil
 }
 
+func (tr *transactionRepo) GetTrsByUserId(ctx context.Context, userId string, limit, offset int, sortConf *transactions.SortConfig) ([]transactions.Transaction, error) {
+	var ts []transactions.Transaction
+	query := tr.DB.Where("user_id = ?", userId).Limit(limit).Offset(offset)
+	if sortConf != nil {
+		if sortConf.ByAmountAsc {
+			query = query.Order("amount asc")
+		}
+		if sortConf.ByAmountDesc {
+			query = query.Order("amount desc")
+		}
+		if sortConf.ByDateAsc {
+			query = query.Order("updated_at asc")
+		}
+		if sortConf.ByDateDesc {
+			query = query.Order("updated_at desc")
+		}
+	}
+	err := query.Find(&ts).Error
+	if err != nil {
+		log.Error(ctx, "error while getting applied transactions by user id: %s", userId)
+		return []transactions.Transaction{}, transactions.ErrTransactionQuery
+	}
+	return ts, nil
+
+}
+
 func (tr *transactionRepo) Migrate() error {
 	return tr.DB.AutoMigrate(&transactions.Transaction{})
 }

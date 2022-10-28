@@ -8,6 +8,7 @@ type Repo interface {
 	GetTrByOrderAndServiceIds(ctx context.Context, orderId, serviceId string) (Transaction, error)
 	UpdateTrStatus(ctx context.Context, t Transaction) error
 	DeleteTr(ctx context.Context, t Transaction) error
+	GetTrsByUserId(ctx context.Context, userId string, limit, offset int, sortConf *SortConfig) ([]Transaction, error)
 }
 
 // Service defines the business logic of users
@@ -16,6 +17,7 @@ type Service interface {
 	Freeze(ctx context.Context, userId, orderId, service_id string, amount float64) error
 	Apply(ctx context.Context, userId, orderId, service_id string, amount float64) error
 	Revert(ctx context.Context, userId, orderId, service_id string, amount float64) error
+	GetUserStat(ctx context.Context, userId string, limit, offset int, sortConf *SortConfig) ([]Transaction, error)
 }
 
 type transaction struct {
@@ -134,10 +136,8 @@ func (t *transaction) Revert(ctx context.Context, userId, orderId, serviceId str
 
 }
 
-func (t *transaction) UserStat(ctx context.Context, userId string, limit, offset int, sortedByDate, sortedByTime bool) error {
-	// cancel only frozen transactions
-	// check that the ids are not empty
-	return nil
+func (t *transaction) GetUserStat(ctx context.Context, userId string, limit, offset int, sortConf *SortConfig) ([]Transaction, error) {
+	return t.repo.GetTrsByUserId(ctx, userId, limit, offset, sortConf)
 }
 
 func (t *transaction) TimePeriodStatExport(ctx context.Context, userId string, limit, offset int, sortedByDate, sortedByTime bool) error {
