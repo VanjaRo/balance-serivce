@@ -37,6 +37,9 @@ func newTransactionHandler(router *gin.Engine, userService users.Service, transa
 	router.POST("/transactions/apply", handler.Apply)
 	router.DELETE("/transactions/revert", handler.Revert)
 	router.GET("/transactions/stat/:id", handler.GetUserTrs)
+	router.GET("/transactions/services-sum-amount", handler.ExportTrsWithinYearMonth)
+
+	router.Static("/csvs", "./csvs")
 }
 
 func (h *handler) Deposit(rCtx *gin.Context) {
@@ -270,6 +273,31 @@ func (h *handler) GetUserTrs(rCtx *gin.Context) {
 		}
 		rCtx.IndentedJSON(http.StatusOK, res)
 	}
+}
+
+func (h *handler) ExportTrsWithinYearMonth(rCtx *gin.Context) {
+	var q struct {
+		Year  int `form:"year" binding:"required"`
+		Month int `form:"month" binding:"required"`
+	}
+	ctx := context.GetReqCtx(rCtx)
+
+	if err := rCtx.BindQuery(&q); err != nil {
+		log.Info(ctx, "query parse error: %s", err.Error())
+		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
+		return
+	}
+
+	err := h.TransactionService.ExportTrsWithinYearMonth(ctx, q.Year, q.Month)
+	if err != nil {
+		status, appErr := handleError(err)
+		rCtx.IndentedJSON(status, appErr)
+		return
+	}
+
+	uri := fmt.Sprintf("%s/csvs/services-stats-%d-%d.csv", rCtx.Request.Host, q.Year, q.Month)
+
+	rCtx.IndentedJSON(http.StatusOK, gin.H{"uri": uri})
 }
 
 func handleError(e error) (int, error) {

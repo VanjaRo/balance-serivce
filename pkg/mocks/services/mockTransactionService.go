@@ -17,6 +17,8 @@ type MockTransactionsService struct {
 
 	GetUserTrsResult []transactions.Transaction
 	GetUserTrsError  error
+
+	ExportCSVError error
 }
 
 func (s *MockTransactionsService) Deposit(ctx context.Context, userId string, amount float64) error {
@@ -34,4 +36,8 @@ func (s *MockTransactionsService) Revert(ctx context.Context, userId, orderId, s
 }
 func (s *MockTransactionsService) GetUserTrs(ctx context.Context, userId string, limit, offset int, sortConf *transactions.SortConfig) ([]transactions.Transaction, error) {
 	return s.GetUserTrsResult, s.GetUserTrsError
+}
+
+func (s *MockTransactionsService) ExportTrsWithinYearMonth(ctx context.Context, year, month int) error {
+	return s.ExportCSVError
 }

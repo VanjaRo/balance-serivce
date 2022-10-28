@@ -1,6 +1,16 @@
 package transactions
 
-import "context"
+import (
+	"context"
+	"encoding/csv"
+	"errors"
+	"fmt"
+
+	"os"
+	"strconv"
+
+	"github.com/VanjaRo/balance-serivce/pkg/utils/log"
+)
 
 // Repo defines the DB level interaction of transactions
 type Repo interface {
@@ -9,6 +19,7 @@ type Repo interface {
 	UpdateTrStatus(ctx context.Context, t Transaction) error
 	DeleteTr(ctx context.Context, t Transaction) error
 	GetTrsByUserId(ctx context.Context, userId string, limit, offset int, sortConf *SortConfig) ([]Transaction, error)
+	GetServicesStatsWithinYearMonth(ctx context.Context, year, month int) ([]ServicesStat, error)
 }
 
 // Service defines the business logic of users
@@ -18,6 +29,7 @@ type Service interface {
 	Apply(ctx context.Context, userId, orderId, service_id string, amount float64) error
 	Revert(ctx context.Context, userId, orderId, service_id string, amount float64) error
 	GetUserTrs(ctx context.Context, userId string, limit, offset int, sortConf *SortConfig) ([]Transaction, error)
+	ExportTrsWithinYearMonth(ctx context.Context, year, month int) error
 }
 
 type transaction struct {
@@ -140,8 +152,42 @@ func (t *transaction) GetUserTrs(ctx context.Context, userId string, limit, offs
 	return t.repo.GetTrsByUserId(ctx, userId, limit, offset, sortConf)
 }
 
-func (t *transaction) TimePeriodStatExport(ctx context.Context, userId string, limit, offset int, sortedByDate, sortedByTime bool) error {
-	// cancel only frozen transactions
-	// check that the ids are not empty
+func (t *transaction) ExportTrsWithinYearMonth(ctx context.Context, year, month int) error {
+	// get all transactions within the year and month
+	servicesStats, err := t.repo.GetServicesStatsWithinYearMonth(ctx, year, month)
+	if err != nil {
+		return err
+	}
+	// export the transactions to a csv file with "," as delimiter
+	// the file name should be "transactions-<year>-<month>.csv"
+	// the file should be saved in the csvs directory
+
+	path := "csvs"
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		err := os.Mkdir(path, os.ModePerm)
+		if err != nil {
+			log.Error(ctx, "error creating directory", err)
+		}
+	}
+	csvFile, err := os.Create(fmt.Sprintf("csvs/services-stats-%d-%d.csv", year, month))
+	if err != nil {
+		return err
+	}
+	defer csvFile.Close()
+
+	csvwriter := csv.NewWriter(csvFile)
+	defer csvwriter.Flush()
+	for _, serviceStat := range servicesStats {
+		// do not export transactions with empty serviceId (reserved for deposits)
+		if serviceStat.ServiceId == "" {
+			continue
+		}
+
+		err := csvwriter.Write([]string{serviceStat.ServiceId, strconv.Itoa(int(serviceStat.Sum))})
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

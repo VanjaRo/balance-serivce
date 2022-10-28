@@ -38,3 +38,8 @@ type SortConfig struct {
 	ByAmountAsc  bool
 	ByAmountDesc bool
 }
+
+type ServicesStat struct {
+	ServiceId string  `json:"service_id"`
+	Sum       float64 `json:"sum"`
+}

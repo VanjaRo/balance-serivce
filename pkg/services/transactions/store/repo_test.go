@@ -48,4 +48,11 @@ func TestUserRepo(t *testing.T) {
 		err = repo.UpdateTrStatus(context.Background(), transaction)
 		assert.NoError(t, err)
 	})
+	// export transactions within year-month
+	t.Run("export transactions within year-month", func(t *testing.T) {
+		repo := NewTransactionRepo(db)
+		ts, err := repo.GetServicesStatsWithinYearMonth(context.Background(), 2022, 10)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, ts)
+	})
 }

@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/VanjaRo/balance-serivce/pkg/services/transactions"
 	"github.com/VanjaRo/balance-serivce/pkg/utils/log"
@@ -87,6 +88,20 @@ func (tr *transactionRepo) GetTrsByUserId(ctx context.Context, userId string, li
 	}
 	return ts, nil
 
+}
+
+func (tr *transactionRepo) GetServicesStatsWithinYearMonth(ctx context.Context, year, month int) ([]transactions.ServicesStat, error) {
+	// should return list of mappings service_id -> amount
+	servicesStats := []transactions.ServicesStat{}
+	// select tranactions within given month and year
+	SQLQeryForPeriod := fmt.Sprintf("SELECT service_id, sum(amount) FROM transactions WHERE EXTRACT(YEAR FROM updated_at) = %d AND EXTRACT(MONTH FROM updated_at) = %d AND state = %s GROUP BY service_id", year, month, transactions.TRANSACTION_STATE_APPLIED)
+	err := tr.DB.Raw(SQLQeryForPeriod).Scan(&servicesStats).Error
+	if err != nil {
+		log.Error(ctx, "error while exporting transactions within month")
+		return nil, err
+	}
+	log.Info(ctx, "exporting service stat", servicesStats)
+	return servicesStats, nil
 }
 
 func (tr *transactionRepo) Migrate() error {

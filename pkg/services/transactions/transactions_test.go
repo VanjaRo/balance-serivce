@@ -21,6 +21,9 @@ type repoMock struct {
 
 	GetApplTrsResult []Transaction
 	GetApplTrsError  error
+
+	ExportResult []ServicesStat
+	ExportError  error
 }
 
 func (r *repoMock) Create(ctx context.Context, transaction Transaction) error {
@@ -43,6 +46,9 @@ func (r *repoMock) GetTrsByUserId(ctx context.Context, userId string, limit, off
 	return r.GetApplTrsResult, r.GetApplTrsError
 }
 
+func (r *repoMock) GetServicesStatsWithinYearMonth(ctx context.Context, year, month int) ([]ServicesStat, error) {
+	return r.ExportResult, r.ExportError
+}
 func TestServiceDeposit(t *testing.T) {
 	id := uuid.New().String()
 	tests := map[string]struct {
