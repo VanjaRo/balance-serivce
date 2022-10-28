@@ -76,7 +76,7 @@ func (h *handler) GetUserBalance(rCtx *gin.Context) {
 		return
 	}
 
-	rCtx.IndentedJSON(http.StatusOK, balance)
+	rCtx.IndentedJSON(http.StatusOK, gin.H{"user_id": rCtx.Param("id"), "balance": balance})
 }
 
 func handleError(e error) (int, error) {
