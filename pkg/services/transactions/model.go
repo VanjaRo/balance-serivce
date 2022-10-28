@@ -2,6 +2,11 @@ package transactions
 
 import "time"
 
+const (
+	TRANSACTION_STATE_FROZEN  = "FROZEN"
+	TRANSACTION_STATE_APPLIED = "APPLIED"
+)
+
 // State field represents the state of the transaction
 // Possible values are:
 // 1. "FROZEN"
