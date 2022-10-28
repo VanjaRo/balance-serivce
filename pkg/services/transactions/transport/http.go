@@ -33,6 +33,7 @@ func newTransactionHandler(router *gin.Engine, userService users.Service, transa
 	}
 
 	router.POST("/transactions/deposit", handler.Deposit)
+	router.POST("/transactions/freeze", handler.Freeze)
 }
 
 func (h *handler) Deposit(rCtx *gin.Context) {
@@ -59,6 +60,13 @@ func (h *handler) Deposit(rCtx *gin.Context) {
 			return
 		}
 	} else {
+		// create transaction
+		err = h.TransactionService.Deposit(ctx, q.UserId, q.Amount)
+		if err != nil {
+			status, appErr := handleError(err)
+			rCtx.IndentedJSON(status, appErr)
+			return
+		}
 		// if user exists, update balance
 		err := h.UserService.UpdateUserBalance(ctx, q.UserId, q.Amount)
 		if err != nil {
@@ -67,13 +75,49 @@ func (h *handler) Deposit(rCtx *gin.Context) {
 			return
 		}
 	}
-	// create transaction
-	err = h.TransactionService.Deposit(ctx, q.UserId, q.Amount)
+
+	rCtx.IndentedJSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func (h *handler) Freeze(rCtx *gin.Context) {
+	var q struct {
+		UserId    string  `json:"user_id" binding:"required"`
+		OrderId   string  `json:"order_id" binding:"required"`
+		ServiceId string  `json:"service_id" binding:"required"`
+		Amount    float64 `json:"amount" binding:"required"`
+	}
+	ctx := context.GetReqCtx(rCtx)
+
+	if err := rCtx.BindJSON(&q); err != nil {
+		log.Info(ctx, "query parse error: %s", err.Error())
+		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
+		return
+	}
+	fmt.Printf("q: %+v", q)
+	// check if user exists
+	_, err := h.UserService.Get(ctx, q.UserId)
 	if err != nil {
+		// if user does not exist return error
 		status, appErr := handleError(err)
 		rCtx.IndentedJSON(status, appErr)
 		return
+	} else {
+		// create transaction
+		err = h.TransactionService.Freeze(ctx, q.UserId, q.OrderId, q.ServiceId, q.Amount)
+		if err != nil {
+			status, appErr := handleError(err)
+			rCtx.IndentedJSON(status, appErr)
+			return
+		}
+		// if user exists, update balance
+		err := h.UserService.UpdateUserBalance(ctx, q.UserId, -q.Amount)
+		if err != nil {
+			status, appErr := handleError(err)
+			rCtx.IndentedJSON(status, appErr)
+			return
+		}
 	}
+
 	rCtx.IndentedJSON(http.StatusOK, gin.H{"status": "ok"})
 }
 
