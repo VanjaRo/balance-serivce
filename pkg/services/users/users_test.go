@@ -20,6 +20,8 @@ type repoMock struct {
 
 	CreateResult string
 	CreateError  error
+
+	UpdateErr error
 }
 
 func (r *repoMock) Get(ctx context.Context, id string) (User, error) {
@@ -38,6 +40,10 @@ func (r *repoMock) Create(ctx context.Context, u User) (string, error) {
 	return r.CreateResult, r.CreateError
 }
 
+func (r *repoMock) UpdateUserBalance(ctx context.Context, userId string, balanceDiff float64) error {
+	return r.UpdateErr
+}
+
 func TestServiceGet(t *testing.T) {
 	id := uuid.New().String()
 	tests := map[string]struct {
@@ -47,10 +53,10 @@ func TestServiceGet(t *testing.T) {
 	}{
 		"Happy path": {
 			repo: &repoMock{
-				GetResult: User{Id: id},
+				GetResult: User{Id: id, Balance: 100, Version: 1},
 				GetError:  nil,
 			},
-			result: User{Id: id},
+			result: User{Id: id, Balance: 100, Version: 1},
 			err:    nil,
 		},
 		"Not found from repo": {
@@ -160,7 +166,7 @@ func TestServiceCreate(t *testing.T) {
 	for testName, test := range tests {
 		t.Run(testName, func(t *testing.T) {
 			service := NewUserService(test.repo)
-			response, err := service.Create(context.Background(), test.input)
+			response, err := service.Create(context.Background(), test.input.Id, test.input.Balance)
 
 			assert.Equal(t, test.err, err)
 			assert.Equal(t, test.result, response)

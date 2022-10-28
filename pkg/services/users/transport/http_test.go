@@ -1,7 +1,6 @@
 package transport
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/VanjaRo/balance-serivce/pkg/errors"
+	servmocs "github.com/VanjaRo/balance-serivce/pkg/mocks/services"
 	"github.com/VanjaRo/balance-serivce/pkg/services/users"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -16,47 +16,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type mockService struct {
-	GetResult users.User
-	GetErr    error
-
-	GetAllResult []users.User
-	GetAllErr    error
-
-	GetBalanceResult float64
-	GetBalanceError  error
-
-	CreateResult string
-	CreateErr    error
-}
-
-func (s *mockService) Get(ctx context.Context, id string) (users.User, error) {
-	return s.GetResult, s.GetErr
-}
-
-func (s *mockService) GetAll(ctx context.Context, limit, offset int) ([]users.User, error) {
-	return s.GetAllResult, s.GetAllErr
-}
-
-func (s *mockService) Create(ctx context.Context, u users.User) (string, error) {
-	return s.CreateResult, s.CreateErr
-}
-
-func (s *mockService) GetBalance(ctx context.Context, id string) (float64, error) {
-	return s.GetBalanceResult, s.GetBalanceError
-}
-
 func TestHandlerGet(t *testing.T) {
 	id := uuid.New().String()
 	balance := 100.0
 	tests := map[string]struct {
-		mockService users.Service
-		uri         string
-		response    interface{}
-		status      int
+		mockUsersService users.Service
+		uri              string
+		response         interface{}
+		status           int
 	}{
 		"Happy path": {
-			mockService: &mockService{
+			mockUsersService: &servmocs.MockUsersService{
 				GetResult: users.User{Id: id, Balance: balance},
 				GetErr:    nil,
 			},
@@ -68,7 +38,7 @@ func TestHandlerGet(t *testing.T) {
 			status: http.StatusOK,
 		},
 		"Not found": {
-			mockService: &mockService{
+			mockUsersService: &servmocs.MockUsersService{
 				GetResult: users.User{},
 				GetErr:    users.ErrUserNotFound,
 			},
@@ -81,7 +51,7 @@ func TestHandlerGet(t *testing.T) {
 			status: http.StatusNotFound,
 		},
 		"Server error": {
-			mockService: &mockService{
+			mockUsersService: &servmocs.MockUsersService{
 				GetResult: users.User{},
 				GetErr:    fmt.Errorf("internal"),
 			},
@@ -99,7 +69,7 @@ func TestHandlerGet(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			response := httptest.NewRecorder()
 			router := gin.New()
-			newHandler(router, test.mockService)
+			newUsersHandler(router, test.mockUsersService)
 
 			req, err := http.NewRequest(http.MethodGet, test.uri, nil)
 			require.NoError(t, err)
@@ -131,13 +101,13 @@ func TestHandlerGetBalance(t *testing.T) {
 	balance := 100.0
 
 	tests := map[string]struct {
-		mockService users.Service
-		uri         string
-		response    interface{}
-		status      int
+		mockUsersService users.Service
+		uri              string
+		response         interface{}
+		status           int
 	}{
 		"Happy path": {
-			mockService: &mockService{
+			mockUsersService: &servmocs.MockUsersService{
 				GetBalanceResult: balance,
 				GetBalanceError:  nil,
 			},
@@ -146,7 +116,7 @@ func TestHandlerGetBalance(t *testing.T) {
 			status:   http.StatusOK,
 		},
 		"Not found": {
-			mockService: &mockService{
+			mockUsersService: &servmocs.MockUsersService{
 				GetBalanceResult: 0,
 				GetBalanceError:  users.ErrUserNotFound,
 			},
@@ -159,7 +129,7 @@ func TestHandlerGetBalance(t *testing.T) {
 			status: http.StatusNotFound,
 		},
 		"Server error": {
-			mockService: &mockService{
+			mockUsersService: &servmocs.MockUsersService{
 				GetBalanceResult: 0,
 				GetBalanceError:  fmt.Errorf("internal"),
 			},
@@ -177,7 +147,7 @@ func TestHandlerGetBalance(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			response := httptest.NewRecorder()
 			router := gin.New()
-			newHandler(router, test.mockService)
+			newUsersHandler(router, test.mockUsersService)
 
 			req, err := http.NewRequest(http.MethodGet, test.uri, nil)
 			require.NoError(t, err)

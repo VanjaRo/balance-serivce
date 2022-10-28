@@ -18,10 +18,10 @@ type handler struct {
 
 func ActivateHandlers(router *gin.Engine, db *gorm.DB) {
 	userService := users.NewUserService(store.NewUserRepo(db))
-	newHandler(router, userService)
+	newUsersHandler(router, userService)
 }
 
-func newHandler(router *gin.Engine, userService users.Service) {
+func newUsersHandler(router *gin.Engine, userService users.Service) {
 	handler := handler{
 		UserService: userService,
 	}
@@ -76,7 +76,7 @@ func (h *handler) GetUserBalance(rCtx *gin.Context) {
 		return
 	}
 
-	rCtx.IndentedJSON(http.StatusOK, balance)
+	rCtx.IndentedJSON(http.StatusOK, gin.H{"user_id": rCtx.Param("id"), "balance": balance})
 }
 
 func handleError(e error) (int, error) {
