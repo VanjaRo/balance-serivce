@@ -18,7 +18,6 @@ type Transaction struct {
 	ServiceId string    `json:"service_id"`
 	Amount    float64   `json:"amount"`
 	State     string    `json:"state"`
-	IsDeposit bool      `json:"type"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime:milli" json:"updated_at"`
 }
 

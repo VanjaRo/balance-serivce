@@ -253,7 +253,7 @@ func (h *handler) GetUserTrs(rCtx *gin.Context) {
 
 		for _, s := range stat {
 			// deposit format
-			if s.IsDeposit {
+			if s.ServiceId == "" && s.OrderId == "" {
 				res = append(res, map[string]interface{}{
 					"date":   s.UpdatedAt,
 					"amount": s.Amount,

@@ -26,7 +26,6 @@ func TestUserRepo(t *testing.T) {
 			ServiceId: "1",
 			Amount:    100,
 			State:     transactions.TRANSACTION_STATE_FROZEN,
-			IsDeposit: false,
 		}
 		err := repo.Create(context.Background(), transaction)
 		assert.NoError(t, err)
