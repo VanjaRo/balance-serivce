@@ -24,10 +24,10 @@ type Repo interface {
 
 // Service defines the business logic of users
 type Service interface {
-	Deposit(ctx context.Context, userId string, amount float64) error
-	Freeze(ctx context.Context, userId, orderId, service_id string, amount float64) error
-	Apply(ctx context.Context, userId, orderId, service_id string, amount float64) error
-	Revert(ctx context.Context, userId, orderId, service_id string, amount float64) error
+	Deposit(ctx context.Context, userId string, amount int) error
+	Freeze(ctx context.Context, userId, orderId, service_id string, amount int) error
+	Apply(ctx context.Context, userId, orderId, service_id string, amount int) error
+	Revert(ctx context.Context, userId, orderId, service_id string, amount int) error
 	GetUserTrs(ctx context.Context, userId string, limit, offset int, sortConf *SortConfig) ([]Transaction, error)
 	ExportTrsWithinYearMonth(ctx context.Context, year, month int) error
 }
@@ -41,7 +41,7 @@ func NewTransactionService(repo Repo) Service {
 		repo: repo,
 	}
 }
-func (t *transaction) Deposit(ctx context.Context, userId string, amount float64) error {
+func (t *transaction) Deposit(ctx context.Context, userId string, amount int) error {
 	// check if the amount is positive
 	if amount <= 0 {
 		return ErrNegativeOrZeroAmount
@@ -59,7 +59,7 @@ func (t *transaction) Deposit(ctx context.Context, userId string, amount float64
 
 	return nil
 }
-func (t *transaction) Freeze(ctx context.Context, userId, orderId, serviceId string, amount float64) error {
+func (t *transaction) Freeze(ctx context.Context, userId, orderId, serviceId string, amount int) error {
 	// check if the amount is positive
 	if amount <= 0 {
 		return ErrNegativeOrZeroAmount
@@ -89,7 +89,7 @@ func (t *transaction) Freeze(ctx context.Context, userId, orderId, serviceId str
 
 	return ErrCantFreezeSameTransactionTwice
 }
-func (t *transaction) Apply(ctx context.Context, userId, orderId, serviceId string, amount float64) error {
+func (t *transaction) Apply(ctx context.Context, userId, orderId, serviceId string, amount int) error {
 	// apply only frozen transactions
 	// check that the ids are not empty
 	if userId == "" || serviceId == "" || orderId == "" {
@@ -118,7 +118,7 @@ func (t *transaction) Apply(ctx context.Context, userId, orderId, serviceId stri
 	return nil
 }
 
-func (t *transaction) Revert(ctx context.Context, userId, orderId, serviceId string, amount float64) error {
+func (t *transaction) Revert(ctx context.Context, userId, orderId, serviceId string, amount int) error {
 	// revert only frozen transactions
 	// check that the ids are not empty
 	if userId == "" || serviceId == "" || orderId == "" {
@@ -181,7 +181,7 @@ func (t *transaction) ExportTrsWithinYearMonth(ctx context.Context, year, month 
 			continue
 		}
 
-		err := csvwriter.Write([]string{serviceStat.ServiceId, strconv.Itoa(int(serviceStat.Sum))})
+		err := csvwriter.Write([]string{serviceStat.ServiceId, strconv.Itoa(serviceStat.Sum)})
 		if err != nil {
 			return err
 		}

@@ -13,7 +13,7 @@ type MockUsersService struct {
 	GetAllResult []users.User
 	GetAllErr    error
 
-	GetBalanceResult float64
+	GetBalanceResult int
 	GetBalanceError  error
 
 	CreateResult string
@@ -30,14 +30,14 @@ func (s *MockUsersService) GetAll(ctx context.Context, limit, offset int) ([]use
 	return s.GetAllResult, s.GetAllErr
 }
 
-func (s *MockUsersService) Create(ctx context.Context, userId string, balance float64) (string, error) {
+func (s *MockUsersService) Create(ctx context.Context, userId string, balance int) (string, error) {
 	return s.CreateResult, s.CreateErr
 }
 
-func (s *MockUsersService) GetBalance(ctx context.Context, id string) (float64, error) {
+func (s *MockUsersService) GetBalance(ctx context.Context, id string) (int, error) {
 	return s.GetBalanceResult, s.GetBalanceError
 }
 
-func (s *MockUsersService) UpdateUserBalance(ctx context.Context, userId string, balanceDiff float64) error {
+func (s *MockUsersService) UpdateUserBalance(ctx context.Context, userId string, balanceDiff int) error {
 	return s.UpdateErr
 }

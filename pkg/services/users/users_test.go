@@ -12,7 +12,7 @@ type repoMock struct {
 	GetResult User
 	GetError  error
 
-	GetBalanceResult float64
+	GetBalanceResult int
 	GetBalanceError  error
 
 	GetAllResult []User
@@ -28,7 +28,7 @@ func (r *repoMock) Get(ctx context.Context, id string) (User, error) {
 	return r.GetResult, r.GetError
 }
 
-func (r *repoMock) GetUserBalance(ctx context.Context, id string) (float64, error) {
+func (r *repoMock) GetUserBalance(ctx context.Context, id string) (int, error) {
 	return r.GetBalanceResult, r.GetBalanceError
 }
 
@@ -40,7 +40,7 @@ func (r *repoMock) Create(ctx context.Context, u User) (string, error) {
 	return r.CreateResult, r.CreateError
 }
 
-func (r *repoMock) UpdateUserBalance(ctx context.Context, userId string, balanceDiff float64) error {
+func (r *repoMock) UpdateUserBalance(ctx context.Context, userId string, balanceDiff int) error {
 	return r.UpdateErr
 }
 
@@ -82,10 +82,10 @@ func TestServiceGet(t *testing.T) {
 
 func TestServiceGetBalance(t *testing.T) {
 	id := uuid.New().String()
-	balance := 100.0
+	balance := 100
 	tests := map[string]struct {
 		repo   Repo
-		result float64
+		result int
 		err    error
 	}{
 		"Happy path": {
@@ -119,7 +119,7 @@ func TestServiceGetBalance(t *testing.T) {
 
 func TestServiceCreate(t *testing.T) {
 	id := uuid.New().String()
-	balance := 100.0
+	balance := 100
 	u := User{Id: id, Balance: balance}
 
 	tests := map[string]struct {

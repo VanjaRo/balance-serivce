@@ -35,9 +35,9 @@ func (u *userRepo) Get(ctx context.Context, id string) (users.User, error) {
 }
 
 // gets balance from user
-func (u *userRepo) GetUserBalance(ctx context.Context, id string) (float64, error) {
+func (u *userRepo) GetUserBalance(ctx context.Context, id string) (int, error) {
 
-	var userBalance float64
+	var userBalance int
 	err := u.DB.Model(&users.User{}).Select("balance").Where("id = ?", id).First(&userBalance).Error
 	if err != nil {
 		log.Info(ctx, "user with id=%s not found", id)
@@ -66,7 +66,7 @@ func (u *userRepo) Create(ctx context.Context, user users.User) (string, error) 
 	return user.Id, nil
 }
 
-func (u *userRepo) UpdateUserBalance(ctx context.Context, userId string, balanceDiff float64) error {
+func (u *userRepo) UpdateUserBalance(ctx context.Context, userId string, balanceDiff int) error {
 	//  update balance using optimistic locking
 	for i := 0; i < 100; i++ {
 		// get user

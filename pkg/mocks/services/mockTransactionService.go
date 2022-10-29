@@ -21,17 +21,17 @@ type MockTransactionsService struct {
 	ExportCSVError error
 }
 
-func (s *MockTransactionsService) Deposit(ctx context.Context, userId string, amount float64) error {
+func (s *MockTransactionsService) Deposit(ctx context.Context, userId string, amount int) error {
 	return s.DepositErr
 }
-func (s *MockTransactionsService) Freeze(ctx context.Context, userId, orderId, serviceId string, amount float64) error {
+func (s *MockTransactionsService) Freeze(ctx context.Context, userId, orderId, serviceId string, amount int) error {
 	return s.FreezeErr
 }
-func (s *MockTransactionsService) Apply(ctx context.Context, userId, orderId, service_id string, amount float64) error {
+func (s *MockTransactionsService) Apply(ctx context.Context, userId, orderId, service_id string, amount int) error {
 	return s.ApplyErr
 }
 
-func (s *MockTransactionsService) Revert(ctx context.Context, userId, orderId, service_id string, amount float64) error {
+func (s *MockTransactionsService) Revert(ctx context.Context, userId, orderId, service_id string, amount int) error {
 	return s.ApplyErr
 }
 func (s *MockTransactionsService) GetUserTrs(ctx context.Context, userId string, limit, offset int, sortConf *transactions.SortConfig) ([]transactions.Transaction, error) {

@@ -18,7 +18,7 @@ import (
 
 func TestHandlerGet(t *testing.T) {
 	id := uuid.New().String()
-	balance := 100.0
+	balance := 100
 	tests := map[string]struct {
 		mockUsersService users.Service
 		uri              string
@@ -98,7 +98,7 @@ func TestHandlerGet(t *testing.T) {
 
 func TestHandlerGetBalance(t *testing.T) {
 	id := uuid.New().String()
-	balance := 100.0
+	balance := 100
 
 	tests := map[string]struct {
 		mockUsersService users.Service
@@ -158,7 +158,7 @@ func TestHandlerGetBalance(t *testing.T) {
 			assert.Equal(t, test.status, response.Code)
 
 			if test.status == http.StatusOK {
-				var userBalance float64
+				var userBalance int
 				if err := json.Unmarshal(response.Body.Bytes(), &userBalance); err != nil {
 					assert.Fail(t, "failed to unmarshal", response.Body.String(), err)
 				}

@@ -44,8 +44,8 @@ func newTransactionHandler(router *gin.Engine, userService users.Service, transa
 
 func (h *handler) Deposit(rCtx *gin.Context) {
 	var q struct {
-		UserId string  `json:"user_id" binding:"required"`
-		Amount float64 `json:"amount" binding:"required"`
+		UserId string `json:"user_id" binding:"required"`
+		Amount int    `json:"amount" binding:"required"`
 	}
 	ctx := context.GetReqCtx(rCtx)
 
@@ -87,10 +87,10 @@ func (h *handler) Deposit(rCtx *gin.Context) {
 
 func (h *handler) Freeze(rCtx *gin.Context) {
 	var q struct {
-		UserId    string  `json:"user_id" binding:"required"`
-		OrderId   string  `json:"order_id" binding:"required"`
-		ServiceId string  `json:"service_id" binding:"required"`
-		Amount    float64 `json:"amount" binding:"required"`
+		UserId    string `json:"user_id" binding:"required"`
+		OrderId   string `json:"order_id" binding:"required"`
+		ServiceId string `json:"service_id" binding:"required"`
+		Amount    int    `json:"amount" binding:"required"`
 	}
 	ctx := context.GetReqCtx(rCtx)
 
@@ -131,10 +131,10 @@ func (h *handler) Freeze(rCtx *gin.Context) {
 
 func (h *handler) Apply(rCtx *gin.Context) {
 	var q struct {
-		UserId    string  `json:"user_id" binding:"required"`
-		OrderId   string  `json:"order_id" binding:"required"`
-		ServiceId string  `json:"service_id" binding:"required"`
-		Amount    float64 `json:"amount" binding:"required"`
+		UserId    string `json:"user_id" binding:"required"`
+		OrderId   string `json:"order_id" binding:"required"`
+		ServiceId string `json:"service_id" binding:"required"`
+		Amount    int    `json:"amount" binding:"required"`
 	}
 	ctx := context.GetReqCtx(rCtx)
 
@@ -166,10 +166,10 @@ func (h *handler) Apply(rCtx *gin.Context) {
 
 func (h *handler) Revert(rCtx *gin.Context) {
 	var q struct {
-		UserId    string  `json:"user_id" binding:"required"`
-		OrderId   string  `json:"order_id" binding:"required"`
-		ServiceId string  `json:"service_id" binding:"required"`
-		Amount    float64 `json:"amount" binding:"required"`
+		UserId    string `json:"user_id" binding:"required"`
+		OrderId   string `json:"order_id" binding:"required"`
+		ServiceId string `json:"service_id" binding:"required"`
+		Amount    int    `json:"amount" binding:"required"`
 	}
 	ctx := context.GetReqCtx(rCtx)
 
