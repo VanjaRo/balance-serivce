@@ -174,6 +174,7 @@ func (t *transaction) ExportTrsWithinYearMonth(ctx context.Context, year, month 
 	defer csvFile.Close()
 
 	csvwriter := csv.NewWriter(csvFile)
+	csvwriter.Comma = ';'
 	defer csvwriter.Flush()
 	for _, serviceStat := range servicesStats {
 		// do not export transactions with empty serviceId (reserved for deposits)
