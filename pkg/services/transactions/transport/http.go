@@ -54,7 +54,6 @@ func (h *handler) Deposit(rCtx *gin.Context) {
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
-	fmt.Printf("q: %+v", q)
 	// check if user exists
 	_, err := h.UserService.Get(ctx, q.UserId)
 	if err != nil {
@@ -101,7 +100,6 @@ func (h *handler) Freeze(rCtx *gin.Context) {
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
-	fmt.Printf("q: %+v", q)
 	// check if user exists
 	_, err := h.UserService.Get(ctx, userId)
 	if err != nil {
@@ -143,7 +141,6 @@ func (h *handler) Apply(rCtx *gin.Context) {
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
-	fmt.Printf("q: %+v", q)
 	// check if user exists
 	_, err := h.UserService.Get(ctx, q.UserId)
 	if err != nil {
@@ -178,7 +175,7 @@ func (h *handler) Revert(rCtx *gin.Context) {
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
-	fmt.Printf("q: %+v", q)
+
 	// check if user exists
 	_, err := h.UserService.Get(ctx, q.UserId)
 	if err != nil {
@@ -226,7 +223,6 @@ func (h *handler) GetUserTrs(rCtx *gin.Context) {
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
-	fmt.Printf("q: %+v", q)
 	// check if user exists
 	_, err := h.UserService.Get(ctx, userId)
 	if err != nil {

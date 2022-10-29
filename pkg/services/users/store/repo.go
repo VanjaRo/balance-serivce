@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"fmt"
 	"os/user"
 
 	"github.com/VanjaRo/balance-serivce/pkg/services/users"
@@ -78,7 +77,6 @@ func (u *userRepo) UpdateUserBalance(ctx context.Context, userId string, balance
 		if user.Balance+balanceDiff < 0.0 {
 			return users.ErrNegativeBalance
 		}
-		fmt.Printf("user balance: %f, user version: %d", user.Balance, user.Version)
 		// update balance
 		user.Balance += balanceDiff
 		user.Version++
