@@ -44,8 +44,8 @@ func newTransactionHandler(router *gin.Engine, userService users.Service, transa
 
 func (h *handler) Deposit(rCtx *gin.Context) {
 	var q struct {
-		UserId string  `json:"user_id" binding:"required"`
-		Amount float64 `json:"amount" binding:"required"`
+		UserId string `json:"user_id" binding:"required"`
+		Amount int    `json:"amount" binding:"required"`
 	}
 	ctx := context.GetReqCtx(rCtx)
 
@@ -54,7 +54,6 @@ func (h *handler) Deposit(rCtx *gin.Context) {
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
-	fmt.Printf("q: %+v", q)
 	// check if user exists
 	_, err := h.UserService.Get(ctx, q.UserId)
 	if err != nil {
@@ -87,10 +86,10 @@ func (h *handler) Deposit(rCtx *gin.Context) {
 
 func (h *handler) Freeze(rCtx *gin.Context) {
 	var q struct {
-		UserId    string  `json:"user_id" binding:"required"`
-		OrderId   string  `json:"order_id" binding:"required"`
-		ServiceId string  `json:"service_id" binding:"required"`
-		Amount    float64 `json:"amount" binding:"required"`
+		UserId    string `json:"user_id" binding:"required"`
+		OrderId   string `json:"order_id" binding:"required"`
+		ServiceId string `json:"service_id" binding:"required"`
+		Amount    int    `json:"amount" binding:"required"`
 	}
 	ctx := context.GetReqCtx(rCtx)
 
@@ -101,7 +100,6 @@ func (h *handler) Freeze(rCtx *gin.Context) {
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
-	fmt.Printf("q: %+v", q)
 	// check if user exists
 	_, err := h.UserService.Get(ctx, userId)
 	if err != nil {
@@ -131,10 +129,10 @@ func (h *handler) Freeze(rCtx *gin.Context) {
 
 func (h *handler) Apply(rCtx *gin.Context) {
 	var q struct {
-		UserId    string  `json:"user_id" binding:"required"`
-		OrderId   string  `json:"order_id" binding:"required"`
-		ServiceId string  `json:"service_id" binding:"required"`
-		Amount    float64 `json:"amount" binding:"required"`
+		UserId    string `json:"user_id" binding:"required"`
+		OrderId   string `json:"order_id" binding:"required"`
+		ServiceId string `json:"service_id" binding:"required"`
+		Amount    int    `json:"amount" binding:"required"`
 	}
 	ctx := context.GetReqCtx(rCtx)
 
@@ -143,7 +141,6 @@ func (h *handler) Apply(rCtx *gin.Context) {
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
-	fmt.Printf("q: %+v", q)
 	// check if user exists
 	_, err := h.UserService.Get(ctx, q.UserId)
 	if err != nil {
@@ -166,10 +163,10 @@ func (h *handler) Apply(rCtx *gin.Context) {
 
 func (h *handler) Revert(rCtx *gin.Context) {
 	var q struct {
-		UserId    string  `json:"user_id" binding:"required"`
-		OrderId   string  `json:"order_id" binding:"required"`
-		ServiceId string  `json:"service_id" binding:"required"`
-		Amount    float64 `json:"amount" binding:"required"`
+		UserId    string `json:"user_id" binding:"required"`
+		OrderId   string `json:"order_id" binding:"required"`
+		ServiceId string `json:"service_id" binding:"required"`
+		Amount    int    `json:"amount" binding:"required"`
 	}
 	ctx := context.GetReqCtx(rCtx)
 
@@ -178,7 +175,7 @@ func (h *handler) Revert(rCtx *gin.Context) {
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
-	fmt.Printf("q: %+v", q)
+
 	// check if user exists
 	_, err := h.UserService.Get(ctx, q.UserId)
 	if err != nil {
@@ -226,7 +223,6 @@ func (h *handler) GetUserTrs(rCtx *gin.Context) {
 		rCtx.IndentedJSON(http.StatusBadRequest, errors.NewAppError(errors.BadRequest, errors.Desctiptions[errors.BadRequest], ""))
 		return
 	}
-	fmt.Printf("q: %+v", q)
 	// check if user exists
 	_, err := h.UserService.Get(ctx, userId)
 	if err != nil {
@@ -253,7 +249,7 @@ func (h *handler) GetUserTrs(rCtx *gin.Context) {
 
 		for _, s := range stat {
 			// deposit format
-			if s.IsDeposit {
+			if s.ServiceId == "" && s.OrderId == "" {
 				res = append(res, map[string]interface{}{
 					"date":   s.UpdatedAt,
 					"amount": s.Amount,

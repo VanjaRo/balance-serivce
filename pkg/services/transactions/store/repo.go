@@ -94,7 +94,7 @@ func (tr *transactionRepo) GetServicesStatsWithinYearMonth(ctx context.Context, 
 	// should return list of mappings service_id -> amount
 	servicesStats := []transactions.ServicesStat{}
 	// select tranactions within given month and year
-	SQLQeryForPeriod := fmt.Sprintf("SELECT service_id, sum(amount) FROM transactions WHERE EXTRACT(YEAR FROM updated_at) = %d AND EXTRACT(MONTH FROM updated_at) = %d AND state = %s GROUP BY service_id", year, month, transactions.TRANSACTION_STATE_APPLIED)
+	SQLQeryForPeriod := fmt.Sprintf("SELECT service_id, sum(amount) FROM transactions WHERE EXTRACT(YEAR FROM updated_at) = %d AND EXTRACT(MONTH FROM updated_at) = %d AND state = '%s' GROUP BY service_id", year, month, transactions.TRANSACTION_STATE_APPLIED)
 	err := tr.DB.Raw(SQLQeryForPeriod).Scan(&servicesStats).Error
 	if err != nil {
 		log.Error(ctx, "error while exporting transactions within month")

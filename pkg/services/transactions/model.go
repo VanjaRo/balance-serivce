@@ -16,9 +16,8 @@ type Transaction struct {
 	OrderId   string    `json:"order_id"`
 	UserId    string    `json:"user_id"`
 	ServiceId string    `json:"service_id"`
-	Amount    float64   `json:"amount"`
+	Amount    int       `json:"amount"`
 	State     string    `json:"state"`
-	IsDeposit bool      `json:"type"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime:milli" json:"updated_at"`
 }
 
@@ -40,6 +39,6 @@ type SortConfig struct {
 }
 
 type ServicesStat struct {
-	ServiceId string  `json:"service_id"`
-	Sum       float64 `json:"sum"`
+	ServiceId string `json:"service_id"`
+	Sum       int    `json:"sum"`
 }
