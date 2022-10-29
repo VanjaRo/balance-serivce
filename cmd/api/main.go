@@ -16,7 +16,7 @@ func main() {
 	// init env variables
 	profile := os.Getenv(servicesProfile)
 	if profile != dockerProfile {
-		if err := godotenv.Load(); err != nil {
+		if err := godotenv.Load("local.env"); err != nil {
 			panic("Error loading .env file")
 		}
 	}
