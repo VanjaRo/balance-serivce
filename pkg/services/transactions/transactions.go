@@ -151,6 +151,10 @@ func (t *transaction) GetUserTrs(ctx context.Context, userId string, limit, offs
 }
 
 func (t *transaction) ExportTrsWithinYearMonth(ctx context.Context, year, month int) error {
+	// validate the year and month
+	if year < 0 || month < 0 || month > 12 {
+		return ErrInvalidYearOrMonth
+	}
 	// get all transactions within the year and month
 	servicesStats, err := t.repo.GetServicesStatsWithinYearMonth(ctx, year, month)
 	if err != nil {
