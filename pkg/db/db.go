@@ -15,13 +15,15 @@ func InitDB(host, port, user, password, dbName string) (*gorm.DB, error) {
 		host, port, user, password, dbName)
 	var db *gorm.DB
 	var err error
-	for i := 0; i < 10; i++ {
+	// retry until db server is ready
+	for {
 		db, err = gorm.Open(postgres.Open(connStr), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
 		})
 		if err != nil {
 			continue
 		}
+		break
 	}
 
 	if err != nil {
