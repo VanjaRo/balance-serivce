@@ -1,22 +1,26 @@
 package db
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/VanjaRo/balance-serivce/pkg/services/transactions"
 	"github.com/VanjaRo/balance-serivce/pkg/services/users"
+	"github.com/VanjaRo/balance-serivce/pkg/utils/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-func InitDB(host, port, user, password, dbName string) (*gorm.DB, error) {
+func InitDB(ctx context.Context, host, port, user, password, dbName string) (*gorm.DB, error) {
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbName)
 	var db *gorm.DB
 	var err error
 	// retry until db server is ready
-	for {
+	log.Info(ctx, "connecting to db...")
+	for i := 0; i < 100000; i++ {
+
 		db, err = gorm.Open(postgres.Open(connStr), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
 		})
@@ -26,6 +30,7 @@ func InitDB(host, port, user, password, dbName string) (*gorm.DB, error) {
 		break
 	}
 
+	log.Info(ctx, "connected to db...")
 	if err != nil {
 		return nil, err
 	}

@@ -5,6 +5,9 @@ import "time"
 const (
 	TRANSACTION_STATE_FROZEN  = "FROZEN"
 	TRANSACTION_STATE_APPLIED = "APPLIED"
+
+	TRANSACTION_TYPE_DEPOSIT    = "DEPOSIT"
+	TRANSACTION_TYPE_WITHDRAWAL = "WITHDRAWAL"
 )
 
 // State field represents the state of the transaction
@@ -18,6 +21,7 @@ type Transaction struct {
 	ServiceId string    `json:"service_id"`
 	Amount    int       `json:"amount"`
 	State     string    `json:"state"`
+	Type      string    `json:"type"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime:milli" json:"updated_at"`
 }
 

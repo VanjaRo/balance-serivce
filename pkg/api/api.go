@@ -25,6 +25,7 @@ type Config struct {
 func Start(cfg *Config) {
 	ctx := context.Background()
 	conn, err := db.InitDB(
+		ctx,
 		cfg.DBHost,
 		cfg.DBPort,
 		cfg.DBUser,

@@ -249,11 +249,11 @@ func (h *handler) GetUserTrs(rCtx *gin.Context) {
 
 		for _, s := range stat {
 			// deposit format
-			if s.ServiceId == "" && s.OrderId == "" {
+			if s.Type == transactions.TRANSACTION_TYPE_DEPOSIT {
 				res = append(res, map[string]interface{}{
 					"date":   s.UpdatedAt,
 					"amount": s.Amount,
-					"type":   "deposit",
+					"type":   transactions.TRANSACTION_TYPE_DEPOSIT,
 				})
 			} else {
 				// withdraw format
@@ -262,7 +262,7 @@ func (h *handler) GetUserTrs(rCtx *gin.Context) {
 					"amount":     s.Amount,
 					"order_id":   s.OrderId,
 					"service_id": s.ServiceId,
-					"type":       "withdrawal",
+					"type":       transactions.TRANSACTION_TYPE_WITHDRAWAL,
 					"state":      s.State,
 				})
 			}

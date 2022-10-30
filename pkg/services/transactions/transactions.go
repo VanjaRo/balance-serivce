@@ -50,7 +50,8 @@ func (t *transaction) Deposit(ctx context.Context, userId string, amount int) er
 	transaction := Transaction{
 		UserId: userId,
 		Amount: amount,
-		State:  "APPLIED",
+		State:  TRANSACTION_STATE_APPLIED,
+		Type:   TRANSACTION_TYPE_DEPOSIT,
 	}
 	err := t.repo.Create(ctx, transaction)
 	if err != nil {
@@ -79,6 +80,7 @@ func (t *transaction) Freeze(ctx context.Context, userId, orderId, serviceId str
 			ServiceId: serviceId,
 			Amount:    amount,
 			State:     TRANSACTION_STATE_FROZEN,
+			Type:      TRANSACTION_TYPE_WITHDRAWAL,
 		}
 		err := t.repo.Create(ctx, transaction)
 		if err != nil {
