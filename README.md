@@ -17,6 +17,18 @@ The app manages User balance through Transaction instances.
   - After _Freezing_, the transaction could be either _Reverted_ (fully deleted from a DB, with money returned to the user's balance) or _Applied_ (transaction is now available for analytics and could not be reverted).
 - **Deposits**
 
+## A little bit of architecture decisions and suggestions
+
+I implemented **optimistic locking** for the _Transaction's_ state and _User's_ balance changes. It prevents dirty writes for async operations.
+
+It might be even more impactful if we had separate modules for the **client** (HTTP handlers) and **business logic + DB layer** connected by **a Message Broker(e.g. Kafka)**. It would allow us to scale the app horizontally, independently of each module. However, it would require a lot of additional work and time.
+
+Potentially we could only store the **balance diffs** in the DB and calculate the **current balance** on the fly using cashed storages. It would make our app more scalable and secure. But it also requires more time and effort spent.
+
+## Tests
+
+For handlers and main business logic I mocked Service and Repo methods and put them into TestFuncs managed by Go **testing** package. However, for the DB layer I used **dockertest** to spin up a **Postgres 14** container and run tests against it.
+
 ## Setup and run
 
 All the following instructions are for Unix based systems.
