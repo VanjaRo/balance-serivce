@@ -14,6 +14,10 @@ const (
 // Possible values are:
 // 1. "FROZEN"
 // 2. "APPLIED"
+// Type field represents the type of the transaction
+// Possible values are:
+// 1. "DEPOSIT"
+// 2. "WITHDRAWAL"
 type Transaction struct {
 	Id        string    `gorm:"primaryKey; autoIncrement" json:"id"`
 	OrderId   string    `json:"order_id"`
